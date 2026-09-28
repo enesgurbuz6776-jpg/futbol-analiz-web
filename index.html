@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050607">
+<meta name="description" content="Futbol Analiz — takım verilerinden istatistiksel maç analizi üretir.">
+<title>Futbol Analiz | İstatistiksel Maç Analizi</title>
+<style>
+:root{
+  --bg:#050607; --card:#0e1114; --card2:#15191e; --line:#242a31;
+  --green:#25d982; --green2:#8df6c6; --gold:#d7b65d; --goldsoft:#2a2417;
+  --text:#f6f7f8; --muted:#9aa3ad; --danger:#ff6f79;
+}
+*{box-sizing:border-box} html{scroll-behavior:smooth}
+body{
+ margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+ color:var(--text);background:
+ radial-gradient(circle at 82% 8%,rgba(37,217,130,.10),transparent 28rem),
+ radial-gradient(circle at 10% 0,rgba(215,182,93,.08),transparent 25rem),
+ linear-gradient(180deg,#050607,#080b0d 55%,#050607);
+ min-height:100vh;
+}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.3;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 75%)}
+.wrap{width:min(1120px,calc(100% - 28px));margin:auto}
+header{position:sticky;top:0;z-index:20;background:rgba(5,6,7,.82);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.06)}
+nav{height:68px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:11px;align-items:center;font-weight:900;letter-spacing:-.3px}
+.logo{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,var(--green2),var(--green));color:#04120b;font-size:20px;box-shadow:0 0 0 5px rgba(37,217,130,.07)}
+.brand b{color:var(--green)}
+.badge{font-size:11px;font-weight:900;letter-spacing:1.2px;color:var(--gold);padding:8px 10px;border-radius:999px;background:var(--goldsoft);border:1px solid rgba(215,182,93,.25)}
+.hero{padding:60px 0 30px;display:grid;grid-template-columns:1fr .8fr;gap:38px;align-items:center}
+.kicker{color:var(--gold);font-size:11px;letter-spacing:1.7px;font-weight:900}
+h1{font-size:clamp(40px,6vw,68px);line-height:.98;letter-spacing:-3px;margin:14px 0 18px}
+.hero p{color:var(--muted);font-size:16px;line-height:1.7;max-width:670px}
+.hero-card{border:1px solid rgba(37,217,130,.17);border-radius:26px;padding:22px;background:linear-gradient(145deg,rgba(15,44,33,.62),rgba(14,17,20,.92));box-shadow:0 24px 80px rgba(0,0,0,.36)}
+.hero-card .live{color:var(--green);font-size:11px;font-weight:900;letter-spacing:1px}
+.hero-card h3{font-size:23px;margin:10px 0 8px}.hero-card p{font-size:13px;margin:0}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.metric{padding:14px;border-radius:15px;background:rgba(0,0,0,.20);border:1px solid rgba(255,255,255,.06)}
+.metric small{display:block;color:#7e8892;font-size:9px;margin-bottom:5px}.metric strong{font-size:18px}
+main{padding-bottom:80px}
+.panel{border:1px solid rgba(255,255,255,.075);border-radius:26px;background:rgba(14,17,20,.88);box-shadow:0 24px 80px rgba(0,0,0,.28);overflow:hidden}
+.panel-head{padding:21px 22px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between;gap:14px}
+.panel-head h2{font-size:20px;margin:0}.panel-head span{color:var(--muted);font-size:12px}
+.content{padding:22px}
+.teams{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.team{padding:18px;border:1px solid rgba(255,255,255,.07);border-radius:20px;background:var(--card2)}
+.team-title{display:flex;align-items:center;gap:9px;margin-bottom:14px}.team-title i{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(37,217,130,.07)}.team-title span{font-weight:800}
+.field{margin-top:12px}.field label{display:block;color:#8f99a4;font-size:11px;font-weight:700;margin-bottom:7px}
+input{width:100%;border:1px solid #2a3037;background:#0c0f12;color:#fff;border-radius:13px;padding:12px 13px;outline:none;font-size:14px}
+input:focus{border-color:rgba(37,217,130,.65);box-shadow:0 0 0 3px rgba(37,217,130,.08)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+button{border:0;border-radius:14px;padding:14px 18px;font-weight:900;cursor:pointer;font-size:13px}
+.primary{background:linear-gradient(135deg,#6cf0b4,#24ce80);color:#04160d;box-shadow:0 12px 30px rgba(37,217,130,.15)}
+.secondary{background:#161b20;color:#d9dde1;border:1px solid rgba(255,255,255,.08)}
+.note{margin-top:14px;color:#7f8993;font-size:11px;line-height:1.55}
+.results{display:none;margin-top:18px}.results.show{display:block}
+.scorebar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.prob{padding:18px;border-radius:18px;background:#11161a;border:1px solid rgba(255,255,255,.07)}
+.prob small{display:block;color:#818b95;font-size:10px;font-weight:800;margin-bottom:7px}.prob strong{font-size:28px}
+.prob.best{border-color:rgba(37,217,130,.45);background:linear-gradient(145deg,rgba(37,217,130,.09),#11161a)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.card{padding:16px;border-radius:17px;background:#11161a;border:1px solid rgba(255,255,255,.065)}
+.card small{display:block;color:#818b95;font-size:9px;font-weight:800;margin-bottom:7px}.card strong{font-size:18px}
+.explain{margin-top:10px;padding:17px;border-radius:17px;background:rgba(215,182,93,.055);border:1px solid rgba(215,182,93,.17);color:#c8cdd2;font-size:12px;line-height:1.7}
+.explain b{color:var(--gold)}
+.section{margin-top:24px;padding:22px;border:1px solid rgba(255,255,255,.065);border-radius:23px;background:rgba(14,17,20,.72)}
+.section h3{margin:0 0 9px}.section p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+footer{padding:25px 0 40px;color:#6f7984;font-size:11px;text-align:center}
+@media(max-width:800px){.hero{grid-template-columns:1fr}.teams{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){nav{height:62px}.brand{font-size:14px}.badge{font-size:9px}.hero{padding-top:40px}h1{font-size:43px}.metrics{grid-template-columns:1fr}.panel-head{align-items:flex-start;flex-direction:column}.content{padding:14px}.team{padding:15px}.scorebar{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><nav>
+  <div class="brand"><div class="logo">⚽</div><span>FUTBOL <b>ANALİZ</b></span></div>
+  <div class="badge">İSTATİSTİK MODELİ</div>
+</nav></div></header>
+
+<div class="wrap">
+<section class="hero">
+  <div>
+    <div class="kicker">VERİYLE FUTBOLU OKU</div>
+    <h1>Maçı tahmin etme.<br><span style="color:var(--green)">Veriyi analiz et.</span></h1>
+    <p>Takımların gol ortalamalarını ve son dönem performansını gir. Sistem Poisson tabanlı basit modelle maç sonucu olasılıkları, toplam gol, karşılıklı gol ve yakın skor senaryosu üretir.</p>
+  </div>
+  <div class="hero-card">
+    <div class="live">● TARAYICIDA ÇALIŞIR</div>
+    <h3>Üyelik yok. Kurulum yok.</h3>
+    <p>Hesaplama doğrudan cihazında yapılır. Bir maçın temel verilerini girip saniyeler içinde istatistiksel görünüm alabilirsin.</p>
+    <div class="metrics"><div class="metric"><small>MODEL</small><strong>Poisson</strong></div><div class="metric"><small>ÇIKTI</small><strong>1-X-2</strong></div><div class="metric"><small>VERİ</small><strong>Yerel</strong></div></div>
+  </div>
+</section>
+
+<main>
+<section class="panel">
+  <div class="panel-head"><div><h2>Maç Analiz Merkezi</h2><span>Temel takım verilerini gir, modeli çalıştır.</span></div><div class="badge">FREE</div></div>
+  <div class="content">
+    <div class="teams">
+      <div class="team">
+        <div class="team-title"><i></i><span>Ev Sahibi</span></div>
+        <div class="field"><label>Takım adı</label><input id="homeName" value="Ev Sahibi"></div>
+        <div class="two">
+          <div class="field"><label>Maç başı attığı gol</label><input id="homeGF" type="number" min="0" step="0.1" value="1.8"></div>
+          <div class="field"><label>Maç başı yediği gol</label><input id="homeGA" type="number" min="0" step="0.1" value="1.0"></div>
+        </div>
+        <div class="field"><label>Son 5 maç puanı (0–15)</label><input id="homeForm" type="number" min="0" max="15" value="10"></div>
+      </div>
+
+      <div class="team">
+        <div class="team-title"><i style="background:var(--gold);box-shadow:0 0 0 5px rgba(215,182,93,.07)"></i><span>Deplasman</span></div>
+        <div class="field"><label>Takım adı</label><input id="awayName" value="Deplasman"></div>
+        <div class="two">
+          <div class="field"><label>Maç başı attığı gol</label><input id="awayGF" type="number" min="0" step="0.1" value="1.3"></div>
+          <div class="field"><label>Maç başı yediği gol</label><input id="awayGA" type="number" min="0" step="0.1" value="1.4"></div>
+        </div>
+        <div class="field"><label>Son 5 maç puanı (0–15)</label><input id="awayForm" type="number" min="0" max="15" value="7"></div>
+      </div>
+    </div>
+
+    <div class="actions"><button class="primary" onclick="analyse()">ANALİZİ ÇALIŞTIR →</button><button class="secondary" onclick="exampleData()">ÖRNEK VERİYİ YÜKLE</button></div>
+    <div class="note">Bu araç yalnızca girilen sayılardan istatistiksel olasılık üretir. Canlı veri çekmez; sonuç garantisi veya bahis tavsiyesi değildir.</div>
+
+    <div class="results" id="results">
+      <div style="margin:22px 0 10px;font-size:12px;color:#89939d;font-weight:800;letter-spacing:1px" id="matchTitle">ANALİZ SONUCU</div>
+      <div class="scorebar">
+        <div class="prob" id="pHome"><small>EV SAHİBİ</small><strong id="homePct">0%</strong></div>
+        <div class="prob" id="pDraw"><small>BERABERLİK</small><strong id="drawPct">0%</strong></div>
+        <div class="prob" id="pAway"><small>DEPLASMAN</small><strong id="awayPct">0%</strong></div>
+      </div>
+      <div class="cards">
+        <div class="card"><small>EV xG</small><strong id="hxg">0.00</strong></div>
+        <div class="card"><small>DEP xG</small><strong id="axg">0.00</strong></div>
+        <div class="card"><small>2.5 ÜST OLASILIĞI</small><strong id="over">0%</strong></div>
+        <div class="card"><small>KG VAR OLASILIĞI</small><strong id="btts">0%</strong></div>
+      </div>
+      <div class="explain" id="explain"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+<h3>Model nasıl çalışıyor?</h3>
+<p>Hücum ve savunma ortalamaları karşılıklı olarak eşleştirilir. Son 5 maç formu küçük bir düzeltme katsayısı olarak eklenir. Ardından 0–6 gol arası Poisson olasılıkları hesaplanarak 1-X-2, toplam gol ve karşılıklı gol sonuçları türetilir.</p>
+</section>
+</main>
+</div>
+
+<footer><div class="wrap">Futbol Analiz • İstatistiksel analiz aracıdır. Kesin sonuç üretmez.</div></footer>
+
+<script>
+function n(id, fallback=0){ const v=parseFloat(document.getElementById(id).value); return Number.isFinite(v)?v:fallback; }
+function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
+function pois(k,l){let f=1;for(let i=2;i<=k;i++)f*=i;return Math.exp(-l)*Math.pow(l,k)/f}
+function pct(v){return (v*100).toFixed(1)+"%"}
+function exampleData(){
+ document.getElementById("homeName").value="Takım A";
+ document.getElementById("awayName").value="Takım B";
+ document.getElementById("homeGF").value="1.9";
+ document.getElementById("homeGA").value="0.9";
+ document.getElementById("awayGF").value="1.2";
+ document.getElementById("awayGA").value="1.5";
+ document.getElementById("homeForm").value="11";
+ document.getElementById("awayForm").value="6";
+ analyse();
+}
+function analyse(){
+ const hn=document.getElementById("homeName").value.trim()||"Ev Sahibi";
+ const an=document.getElementById("awayName").value.trim()||"Deplasman";
+ const hgf=clamp(n("homeGF",1.2),0,5), hga=clamp(n("homeGA",1.2),0,5);
+ const agf=clamp(n("awayGF",1.2),0,5), aga=clamp(n("awayGA",1.2),0,5);
+ const hf=clamp(n("homeForm",7.5),0,15), af=clamp(n("awayForm",7.5),0,15);
+
+ const hFormAdj=0.88 + (hf/15)*0.24;
+ const aFormAdj=0.88 + (af/15)*0.24;
+ let hxg=((hgf+aga)/2)*hFormAdj*1.08;
+ let axg=((agf+hga)/2)*aFormAdj*0.96;
+ hxg=clamp(hxg,.05,4.8); axg=clamp(axg,.05,4.8);
+
+ let home=0,draw=0,away=0,over=0,btts=0,bestP=-1,bestScore="0-0";
+ for(let h=0;h<=6;h++){
+   for(let a=0;a<=6;a++){
+     const p=pois(h,hxg)*pois(a,axg);
+     if(h>a)home+=p; else if(h===a)draw+=p; else away+=p;
+     if(h+a>=3)over+=p;
+     if(h>0&&a>0)btts+=p;
+     if(p>bestP){bestP=p;bestScore=h+"-"+a}
+   }
+ }
+ const total=home+draw+away; home/=total;draw/=total;away/=total;
+
+ document.getElementById("results").classList.add("show");
+ document.getElementById("matchTitle").textContent=hn.toUpperCase()+"  —  "+an.toUpperCase();
+ document.getElementById("homePct").textContent=pct(home);
+ document.getElementById("drawPct").textContent=pct(draw);
+ document.getElementById("awayPct").textContent=pct(away);
+ document.getElementById("hxg").textContent=hxg.toFixed(2);
+ document.getElementById("axg").textContent=axg.toFixed(2);
+ document.getElementById("over").textContent=pct(over);
+ document.getElementById("btts").textContent=pct(btts);
+
+ ["pHome","pDraw","pAway"].forEach(id=>document.getElementById(id).classList.remove("best"));
+ const vals=[home,draw,away], ids=["pHome","pDraw","pAway"];
+ document.getElementById(ids[vals.indexOf(Math.max(...vals))]).classList.add("best");
+
+ const fav=home>away?(home>draw?hn:"Beraberlik"):(away>draw?an:"Beraberlik");
+ document.getElementById("explain").innerHTML=
+   "<b>Model özeti:</b> En yüksek 1-X-2 olasılığı <b>"+fav+"</b> tarafında. "+
+   "Beklenen gol toplamı <b>"+(hxg+axg).toFixed(2)+"</b>. "+
+   "En olası tek skor senaryosu <b>"+bestScore+"</b>. "+
+   "Bu sonuçlar yalnızca girilen ortalamaların matematiksel dağılımıdır; sakatlık, kadro, kırmızı kart, motivasyon ve canlı maç akışı gibi faktörleri içermez.";
+ window.location.hash="results";
+}
+analyse();
+</script>
+</body>
+</html>
